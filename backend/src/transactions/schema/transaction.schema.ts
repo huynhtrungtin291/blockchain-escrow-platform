@@ -12,7 +12,6 @@ export class Transaction {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   seller_id: User | Types.ObjectId;
 
-  // Địa chỉ ví blockchain thực tế
   @Prop({ required: true })
   buyer_wallet_address: string;
 
@@ -23,17 +22,37 @@ export class Transaction {
   amount_coin: number;
 
   @Prop({ required: true })
-  price_fiat: number; // Giá tiền quy đổi do web quy định
+  price_fiat: number; // Giá tiền mặt quy đổi (VND)
 
-  // ID của trade trên Smart Contract
+  // --- THÔNG TIN SMART CONTRACT ---
   @Prop()
-  escrow_trade_id: number;
+  escrow_trade_id: number; // ID giao dịch trên Blockchain để gọi hàm release/cancel
 
-  // Transaction Hash lúc Seller nạp coin vào escrow
   @Prop()
-  deposit_tx_hash: string;
+  deposit_tx_hash: string; // Hash khi Seller nạp coin vào két (Bằng chứng đã nạp)
 
-  @Prop({ default: 'pending' }) // pending, locked, released, cancelled
+  @Prop()
+  release_tx_hash: string; // Hash khi hệ thống tự động/Admin giải ngân coin cho Buyer
+
+  @Prop()
+  refund_tx_hash: string; // Hash khi Admin hủy giao dịch, hoàn coin cho Seller
+
+  // --- THÔNG TIN THANH TOÁN & TRANH CHẤP ---
+  @Prop()
+  payment_proof: string; // Link URL ảnh chụp bill chuyển khoản của Buyer
+
+  @Prop()
+  admin_note: string; // Lời phê/Ghi chú của Admin khi xử lý khiếu nại
+
+  // --- TRẠNG THÁI GIAO DỊCH ---
+  // Các trạng thái chuẩn:
+  // - 'pending': Vừa tạo lệnh
+  // - 'deposited': Seller đã nạp coin vào két
+  // - 'paid': Buyer báo đã chuyển khoản VND
+  // - 'completed': Đã giải ngân coin thành công cho Buyer
+  // - 'disputed': Một trong hai bên khiếu nại (Cần Admin can thiệp)
+  // - 'cancelled': Giao dịch bị hủy (Hoàn coin nếu đã nạp)
+  @Prop({ default: 'pending' })
   status: string;
 }
 
