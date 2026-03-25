@@ -4,6 +4,11 @@ import { User } from '../../users/schema/user.schema';
 
 export type WithdrawalDocument = HydratedDocument<Withdrawal>;
 
+enum WithdrawalStatus {
+  PENDING = 'pending', // Chờ duyệt
+  APPROVED = 'approved', // Đã chuyển tiền
+  REJECTED = 'rejected', // Từ chối
+}
 @Schema({ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } })
 export class Withdrawal {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
@@ -21,9 +26,8 @@ export class Withdrawal {
   @Prop()
   admin_note?: string; // BỔ SUNG: Ghi chú của Admin (VD: "Sai số tài khoản", "Đã duyệt")
 
-  // Trạng thái: 'pending' (Chờ duyệt), 'approved' (Đã chuyển tiền), 'rejected' (Từ chối)
-  @Prop({ default: 'pending' })
-  status: string;
+  @Prop({ default: WithdrawalStatus.PENDING })
+  status: WithdrawalStatus;
 }
 
 export const WithdrawalSchema = SchemaFactory.createForClass(Withdrawal);

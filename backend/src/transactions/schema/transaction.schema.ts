@@ -4,6 +4,14 @@ import { User } from '../../users/schema/user.schema';
 
 export type TransactionDocument = HydratedDocument<Transaction>;
 
+enum TransactionStatus {
+  PENDING = 'pending', // Vừa tạo lệnh
+  DEPOSITED = 'deposited', // Seller đã nạp coin vào két
+  PAID = 'paid', // Buyer báo đã chuyển khoản VND
+  COMPLETED = 'completed', // Đã giải ngân coin thành công cho Buyer
+  DISPUTED = 'disputed', // Một trong hai bên khiếu nại (Cần Admin can thiệp)
+  CANCELLED = 'cancelled', // Giao dịch bị hủy (Hoàn coin nếu đã nạp)
+}
 @Schema({ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } })
 export class Transaction {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
@@ -24,7 +32,7 @@ export class Transaction {
   @Prop({ required: true })
   price_fiat: number; // Giá tiền mặt quy đổi (VND)
 
-  // --- THÔNG TIN SMART CONTRACT ---
+  //THÔNG TIN SMART CONTRACT
   @Prop()
   escrow_trade_id: number; // ID giao dịch trên Blockchain để gọi hàm release/cancel
 
@@ -37,23 +45,15 @@ export class Transaction {
   @Prop()
   refund_tx_hash: string; // Hash khi Admin hủy giao dịch, hoàn coin cho Seller
 
-  // --- THÔNG TIN THANH TOÁN & TRANH CHẤP ---
+  // THÔNG TIN THANH TOÁN & TRANH CHẤP
   @Prop()
   payment_proof: string; // Link URL ảnh chụp bill chuyển khoản của Buyer
 
   @Prop()
   admin_note: string; // Lời phê/Ghi chú của Admin khi xử lý khiếu nại
 
-  // --- TRẠNG THÁI GIAO DỊCH ---
-  // Các trạng thái chuẩn:
-  // - 'pending': Vừa tạo lệnh
-  // - 'deposited': Seller đã nạp coin vào két
-  // - 'paid': Buyer báo đã chuyển khoản VND
-  // - 'completed': Đã giải ngân coin thành công cho Buyer
-  // - 'disputed': Một trong hai bên khiếu nại (Cần Admin can thiệp)
-  // - 'cancelled': Giao dịch bị hủy (Hoàn coin nếu đã nạp)
-  @Prop({ default: 'pending' })
-  status: string;
+  @Prop({ default: TransactionStatus.PENDING })
+  status: TransactionStatus;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

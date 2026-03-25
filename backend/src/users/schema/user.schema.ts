@@ -3,6 +3,11 @@ import { HydratedDocument } from 'mongoose';
 
 export type UserDocument = HydratedDocument<User>;
 
+enum UserRole {
+  USER = 'user',
+  ADMIN = 'admin',
+}
+
 @Schema({ timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } })
 export class User {
   @Prop()
@@ -18,13 +23,10 @@ export class User {
   avatar?: string; // Link ảnh đại diện (URL)
 
   @Prop({ default: 0 })
-  coin_balance?: number; // Số dư coin trong nội bộ hệ thống (nếu có dùng)
+  coin_balance?: number; // Số dư coin hiện tại của người dùng
 
-  // --- THÊM MỚI PHÂN QUYỀN ---
-  // Quyền của tài khoản: 'user' (người dùng bình thường) hoặc 'admin' (quản trị viên)
-  // Admin sẽ có quyền xem các giao dịch bị khiếu nại ('disputed') và xử lý
-  @Prop({ default: 'user' })
-  role: string;
+  @Prop({ default: UserRole.USER })
+  role: UserRole;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
